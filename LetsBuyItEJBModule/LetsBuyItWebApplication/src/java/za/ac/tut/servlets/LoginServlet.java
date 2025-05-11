@@ -7,11 +7,15 @@ package za.ac.tut.servlets;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import javax.ejb.EJB;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import za.ac.tut.bl.UserFacadeLocal;
+import za.ac.tut.entities.User;
 
 /**
  *
@@ -69,11 +73,32 @@ public class LoginServlet extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
+    @EJB
+    private UserFacadeLocal ufl;
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+        String role = request.getParameter("role");
+
+        User user = ufl.login(username, password,role);
+
+        if (user != null) {
+            HttpSession session = request.getSession();
+            session.setAttribute("user", user);
+
+            // Redirect based on role
+            if ("ADMIN".equalsIgnoreCase(role)) {
+                response.sendRedirect("adminHome.jsp");
+            } else {
+                response.sendRedirect("userHome.jsp");
+            }
+        } else {
+            response.sendRedirect("login.jsp?error=invalid");
+        }
     }
+    
 
     /**
      * Returns a short description of the servlet.
