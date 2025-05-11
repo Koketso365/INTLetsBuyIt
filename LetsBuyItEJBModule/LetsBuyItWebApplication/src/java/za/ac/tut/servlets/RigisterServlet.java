@@ -7,18 +7,22 @@ package za.ac.tut.servlets;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import javax.ejb.EJB;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import za.ac.tut.bl.UserFacadeLocal;
+import za.ac.tut.entities.User;
 
 /**
  *
  * @author 20pre
  */
-@WebServlet(name = "RigisterServlet", urlPatterns = {"/RigisterServlet.do"})
-public class RigisterServlet extends HttpServlet {
+@WebServlet(name = "RegisterServlet", urlPatterns = {"/RegisterServlet.do"})
+public class RegisterServlet extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -37,10 +41,10 @@ public class RigisterServlet extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet RigisterServlet</title>");            
+            out.println("<title>Servlet RegisterServlet</title>");            
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet RigisterServlet at " + request.getContextPath() + "</h1>");
+            out.println("<h1>Servlet RegisterServlet at " + request.getContextPath() + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }
@@ -69,10 +73,27 @@ public class RigisterServlet extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
+    @EJB
+    private UserFacadeLocal ufl;
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+        String role = request.getParameter("role");
+
+        User user = new User();
+        user.setUsername(username);
+        user.setPassword(password);
+        user.setRole(role);
+
+        ufl.registerUser(user);
+        String msg = "success";
+        request.setAttribute("message", msg);
+
+        RequestDispatcher dispatcher = request.getRequestDispatcher("register.jsp");
+        dispatcher.forward(request, response);
     }
 
     /**
