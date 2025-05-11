@@ -5,13 +5,23 @@
  */
 package za.ac.tut.servlets;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import javax.ejb.EJB;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Part;
+import za.ac.tut.bl.ProductFacadeLocal;
+import za.ac.tut.entities.Product;
 
 /**
  *
@@ -69,10 +79,51 @@ public class AddProductServlet extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
+    @EJB
+    private ProductFacadeLocal pfl;
+
+    private static final String UPLOAD_DIR = "uploads"; // web/uploads/
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+       
+        String name = request.getParameter("name");
+        String description = request.getParameter("description");
+        System.out.println("description "+description);
+        double price = Double.parseDouble(request.getParameter("price"));
+        System.out.println("price "+price);
+        
+        int quantity = Integer.parseInt(request.getParameter("quantity"));
+
+        Part imagePart = request.getPart("imageFile");
+        String fileName = Paths.get(imagePart.getSubmittedFileName()).getFileName().toString();
+
+        // Get absolute path to the upload folder
+        String uploadPath = getServletContext().getRealPath("") + File.separator + UPLOAD_DIR;
+        File uploadDir = new File(uploadPath);
+        if (!uploadDir.exists()) uploadDir.mkdirs();
+
+        // Save the uploaded file
+        String filePath = uploadPath + File.separator + fileName;
+        try (InputStream input = imagePart.getInputStream()) {
+            Files.copy(input, Paths.get(filePath), StandardCopyOption.REPLACE_EXISTING);
+        }
+
+        // Save relative path to DB for referencing in JSPs
+        String imagePath = UPLOAD_DIR + "/" + fileName;
+
+        // Create product and save
+        Product product = new Product();
+        product.setName(name);
+        product.setDescription(description);
+        product.setPrice(price);
+        product.setQuantity(quantity);
+        product.setImagePath(imagePath);
+
+        pfl.create(product);
+
+        response.sendRedirect("adminHome.jsp"); // or display success message
+    
     }
 
     /**
