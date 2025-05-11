@@ -18,7 +18,7 @@ import za.ac.tut.entities.User;
 @Stateless
 public class UserFacade extends AbstractFacade<User> implements UserFacadeLocal {
 
-    @PersistenceContext(unitName = "LetsBuyItEJBPU")
+    @PersistenceContext(unitName = "LetsBuyItEJBModulePU")
     private EntityManager em;
 
     @Override

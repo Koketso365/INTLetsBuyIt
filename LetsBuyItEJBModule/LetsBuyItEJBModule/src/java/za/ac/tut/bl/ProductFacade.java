@@ -18,7 +18,7 @@ import za.ac.tut.entities.Product;
 @Stateless
 public class ProductFacade extends AbstractFacade<Product> implements ProductFacadeLocal {
 
-    @PersistenceContext(unitName = "LetsBuyItEJBPU")
+    @PersistenceContext(unitName = "LetsBuyItEJBModulePU")
     private EntityManager em;
 
     @Override

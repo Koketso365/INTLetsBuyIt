@@ -20,7 +20,7 @@ import za.ac.tut.entities.User;
 @Stateless
 public class CartFacade extends AbstractFacade<Cart> implements CartFacadeLocal {
 
-    @PersistenceContext(unitName = "LetsBuyItEJBPU")
+    @PersistenceContext(unitName = "LetsBuyItEJBModulePU")
     private EntityManager em;
 
     @Override
