@@ -7,11 +7,15 @@ package za.ac.tut.servlets;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Iterator;
+import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import za.ac.tut.entities.Product;
 
 /**
  *
@@ -72,7 +76,27 @@ public class RemoveFromCartServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+       
+        HttpSession session = request.getSession(false);
+
+        if (session != null) {
+            List<Product> cart = (List<Product>) session.getAttribute("cart");
+
+            if (cart != null) {
+                long productIdToRemove = Long.parseLong(request.getParameter("productId"));
+
+                Iterator<Product> iterator = cart.iterator();
+                while (iterator.hasNext()) {
+                    Product p = iterator.next();
+                    if (p.getProductId() == productIdToRemove) {
+                        iterator.remove();
+                        break; // Remove only one instance
+                    }
+                }
+            }
+        }
+
+        response.sendRedirect("ViewCart.jsp");
     }
 
     /**
