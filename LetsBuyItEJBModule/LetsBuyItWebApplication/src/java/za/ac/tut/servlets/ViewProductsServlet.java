@@ -7,11 +7,16 @@ package za.ac.tut.servlets;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
+import javax.ejb.EJB;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import za.ac.tut.bl.ProductFacadeLocal;
+import za.ac.tut.entities.Product;
 
 /**
  *
@@ -55,10 +60,15 @@ public class ViewProductsServlet extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
+    @EJB
+    private ProductFacadeLocal pfl;
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        List<Product> products = pfl.getAllProducts();
+        request.setAttribute("products", products);
+        RequestDispatcher rd = request.getRequestDispatcher("browseProducts.jsp");
+        rd.forward(request, response);
     }
 
     /**
