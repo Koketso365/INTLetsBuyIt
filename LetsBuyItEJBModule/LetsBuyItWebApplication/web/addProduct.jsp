@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="za.ac.tut.entities.User" %>
 <%
+    
     User admin = (session != null) ? (User) session.getAttribute("user") : null;
 
     if (admin == null || !admin.getRole().equalsIgnoreCase("admin")) {
@@ -91,24 +92,24 @@
 
     <div class="container">
         <h2>Add New Product</h2>
-        <form action="AddProductServlet.do" method="post" enctype="multipart/form-data">
-        <label for="name">Product Name:</label>
-        <input type="text" name="name" id="name" required /><br/>
+        <form action="AddProductServlet.do" method="post">
+            <label for="name">Product Name:</label>
+            <input type="text" name="name" id="name" required />
 
-        <label for="description">Description:</label>
-        <textarea name="description" id="description" required></textarea><br/>
+            <label for="description">Description:</label>
+            <textarea name="description" id="description" rows="4"></textarea>
 
-        <label for="price">Price:</label>
-        <input type="number" name="price" id="price" step="0.01" required /><br/>
+            <label for="price">Price (R):</label>
+            <input type="number" name="price" id="price" step="0.01" min="0" required />
 
-        <label for="quantity">Quantity:</label>
-        <input type="number" name="quantity" id="quantity" required /><br/>
+            <label for="quantity">Quantity in Stock:</label>
+            <input type="number" name="quantity" id="quantity" min="1" required />
 
-        <label for="imageFile">Upload Image:</label>
-        <input type="file" name="imageFile" id="imageFile" accept="image/*" required /><br/><br/>
+            <label for="imagePath">Image Path (URL):</label>
+            <input type="text" name="imagePath" id="imagePath" required />
 
-        <input type="submit" value="Add Product" />
-    </form>
+            <input type="submit" value="Add Product" class="btn-submit" />
+        </form>
 
         <a href="adminHome.jsp" class="back-link">&larr; Back to Dashboard</a>
     </div>

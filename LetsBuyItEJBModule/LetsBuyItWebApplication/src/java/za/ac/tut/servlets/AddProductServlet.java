@@ -82,37 +82,40 @@ public class AddProductServlet extends HttpServlet {
     @EJB
     private ProductFacadeLocal pfl;
 
-    private static final String UPLOAD_DIR = "uploads"; // web/uploads/
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
        
         String name = request.getParameter("name");
         String description = request.getParameter("description");
-        System.out.println("description "+description);
-        double price = Double.parseDouble(request.getParameter("price"));
-        System.out.println("price "+price);
-        
-        int quantity = Integer.parseInt(request.getParameter("quantity"));
+        String priceStr = request.getParameter("price");
+        String quantityStr = request.getParameter("quantity");
+        String imagePath = request.getParameter("imagePath");
 
-        Part imagePart = request.getPart("imageFile");
-        String fileName = Paths.get(imagePart.getSubmittedFileName()).getFileName().toString();
+        // Validate input
+        if (name == null || description == null || priceStr == null || quantityStr == null || imagePath == null
+                || name.trim().isEmpty() || description.trim().isEmpty()
+                || priceStr.trim().isEmpty() || quantityStr.trim().isEmpty()
+                || imagePath.trim().isEmpty()) {
 
-        // Get absolute path to the upload folder
-        String uploadPath = getServletContext().getRealPath("") + File.separator + UPLOAD_DIR;
-        File uploadDir = new File(uploadPath);
-        if (!uploadDir.exists()) uploadDir.mkdirs();
-
-        // Save the uploaded file
-        String filePath = uploadPath + File.separator + fileName;
-        try (InputStream input = imagePart.getInputStream()) {
-            Files.copy(input, Paths.get(filePath), StandardCopyOption.REPLACE_EXISTING);
+            request.setAttribute("error", "All fields are required.");
+            request.getRequestDispatcher("addProduct.jsp").forward(request, response);
+            return;
         }
 
-        // Save relative path to DB for referencing in JSPs
-        String imagePath = UPLOAD_DIR + "/" + fileName;
+        double price;
+        int quantity;
 
-        // Create product and save
+        try {
+            price = Double.parseDouble(priceStr);
+            quantity = Integer.parseInt(quantityStr);
+        } catch (NumberFormatException e) {
+            request.setAttribute("error", "Invalid number format for price or quantity.");
+            request.getRequestDispatcher("addProduct.jsp").forward(request, response);
+            return;
+        }
+
+        // Create and persist product
         Product product = new Product();
         product.setName(name);
         product.setDescription(description);
@@ -122,8 +125,8 @@ public class AddProductServlet extends HttpServlet {
 
         pfl.create(product);
 
-        response.sendRedirect("adminHome.jsp"); // or display success message
-    
+        // Redirect to admin home or show success
+        response.sendRedirect("adminHome.jsp");
     }
 
     /**
